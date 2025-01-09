@@ -17,7 +17,7 @@ import { Icon } from 'astro-icon/components';
     </div>
 </div>
 <script>
-    import { navigate } from 'astro:transitions/client'; 
+    import { navigate } from 'astro:transitions/client';
     function defineVars() {
         const iframe = document.getElementById("iframe") as HTMLIFrameElement;
         const win = iframe.contentWindow;
@@ -29,29 +29,32 @@ import { Icon } from 'astro-icon/components';
         const vars = defineVars();
         if (vars?.win?.__uv) {
             navigator.clipboard.writeText(new URL('./?link=' + encodeURIComponent(__uv$config.encodeUrl!(vars?.win?.__uv.location.href)), location.href).href);
-        } 
+        }
+        else if (vars?.win?.$scramjet) {
+            navigator.clipboard.writeText(new URL(`./?link=${encodeURIComponent(
+                vars?.win?.location.href
+                .replace(vars?.win?.location.origin, '')
+                .replace(vars?.win?.$scramjet.config.prefix, '')
+            )}`, location.href).href);
+        }
     }
     window.exitIframe = function() {
         const vars = defineVars();
-        if (vars?.win?.__uv || vars?.win?.__get$ProxyUrl) {
+        if (vars?.win?.__uv || vars?.win?.__get$ProxyUrl || vars?.win?.$scramjet) {
             navigate("/");
         }
     }
     window.refreshIframe = function() {
         const vars = defineVars();
-        if (vars?.win?.__uv || vars?.win?.__get$ProxyUrl) {
+        if (vars?.win?.__uv || vars?.win?.__get$ProxyUrl || vars?.win?.$scramjet) {
             vars?.win?.location.reload();
         }
     }
     window.setTitle = function() {
         const vars = defineVars();
-        if (vars?.win && vars?.win?.__uv || vars?.win?.__get$ProxyUrl) {
+        if (vars?.win && vars?.win?.__uv || vars?.win?.__get$ProxyUrl || vars?.win?.$scramjet) {
             //@ts-ignore this is really complicated and I am not in the mood to deal with it
             document.getElementById("title").value = Object.getOwnPropertyDescriptor(Document.prototype, 'title').get.call(vars?.win.document);
-        }
-        if (localStorage.getItem("incog||proxy") === "rh") {
-            const linkElement = document.getElementById("createlink") as HTMLButtonElement;
-            linkElement.classList.add("hidden");
         }
     }
 </script>

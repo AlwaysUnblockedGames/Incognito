@@ -1,18 +1,22 @@
-import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
-import { baremuxPath } from '@mercuryworkshop/bare-mux';
+import { baremuxPath } from '@mercuryworkshop/bare-mux/node';
+//@ts-expect-error No types
 import { epoxyPath } from '@mercuryworkshop/epoxy-transport';
+import { libcurlPath } from '@mercuryworkshop/libcurl-transport';
 import playformCompress from '@playform/compress';
 import { uvPath } from '@titaniumnetwork-dev/ultraviolet';
 import icon from 'astro-icon';
 import robotsTxt from 'astro-robots-txt';
 import { defineConfig, envField } from 'astro/config';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+//we need the buildOpts from here : D
+import { parsedDoc } from './server/config/config.ts';
+const scramjetPath = `${import.meta.dirname}/vendor/scramjet/dist/`
 
 // https://astro.build/config
 export default defineConfig({
-    site: process.env.SITE || 'https://localhost:8080',
+    site: Deno.env.get('SITE') || 'https://localhost:8080',
     integrations: [
         tailwind(),
         robotsTxt(),
@@ -23,38 +27,23 @@ export default defineConfig({
             HTML: true,
             Image: true,
             JavaScript: true,
-            SVG: true
-        })
+            SVG: true,
+        }),
     ],
-    output: 'server',
-    adapter: node({
-        mode: 'middleware'
-    }),
-    experimental: {
-        env: {
-            schema: {
-                BARE_SERVER_OPTION: envField.boolean({
-                    context: 'client',
-                    access: 'public',
-                    default: true
-                }),
-                GAMES_LINK: envField.boolean({
-                    context: 'client',
-                    access: 'public',
-                    default: true
-                }),
-                RAMMERHEAD_OPTION: envField.boolean({
-                    context: 'client',
-                    access: 'public',
-                    default: false
-                }),
-                RAMMERHEAD_PREFIX: envField.string({
-                    context: 'client',
-                    access: 'public',
-                    default: '' 
-                })
-            }
-        }
+    output: 'static',
+    env: {
+        schema: {
+            GAMES_LINK: envField.boolean({
+                context: 'client',
+                access: 'public',
+                default: parsedDoc.buildOpts.games,
+            }),
+            SEO: envField.boolean({
+                context: 'client',
+                access: 'public',
+                default: Boolean(Deno.env.get('SEO')) || parsedDoc.seo.enabled
+            })
+        },
     },
     vite: {
         plugins: [
@@ -63,20 +52,30 @@ export default defineConfig({
                     {
                         src: `${uvPath}/**/*`.replace(/\\/g, '/'),
                         dest: 'uv',
-                        overwrite: false
+                        overwrite: false,
                     },
                     {
                         src: `${epoxyPath}/**/*`.replace(/\\/g, '/'),
                         dest: 'epoxy',
-                        overwrite: false
+                        overwrite: false,
+                    },
+                    {
+                        src: `${libcurlPath}/**/*`.replace(/\\/g, '/'),
+                        dest: 'libcurl',
+                        overwrite: false,
                     },
                     {
                         src: `${baremuxPath}/**/*`.replace(/\\/g, '/'),
                         dest: 'baremux',
+                        overwrite: false,
+                    },
+                    {
+                        src: `${scramjetPath}/**/*`.replace(/\\/g, '/'),
+                        dest: 'scram',
                         overwrite: false
                     }
-                ]
-            })
+                ],
+            }),
         ],
         server: {
             proxy: {
@@ -84,22 +83,16 @@ export default defineConfig({
                     target: 'wss://ruby.rubynetwork.co/wisp/',
                     changeOrigin: true,
                     ws: true,
-                    rewrite: (path) => path.replace(/^\/wisp\//, '')
-                },
-                '/bare/': {
-                    target: 'https://ruby.rubynetwork.co/bare/',
-                    changeOrigin: true,
-                    ws: true,
-                    rewrite: (path) => path.replace(/^\/bare\//, '')
+                    rewrite: (path) => path.replace(/^\/wisp\//, ''),
                 },
                 '/gms/': {
                     target: 'https://rawcdn.githack.com/ruby-network/ruby-assets/main/',
                     changeOrigin: true,
                     ws: true,
                     secure: false,
-                    rewrite: (path) => path.replace(/^\/gms\//, '')
-                }
-            }
-        }
-    }
+                    rewrite: (path) => path.replace(/^\/gms\//, ''),
+                },
+            },
+        },
+    },
 });

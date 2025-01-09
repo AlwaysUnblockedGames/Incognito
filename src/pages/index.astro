@@ -2,13 +2,16 @@
 import Links from '@components/NavLinks.astro';
 import Search from '@components/Search.astro';
 import Layout from '@layouts/Layout.astro';
-const link = Astro.url.searchParams.get('link') || null;
 ---
 
 <Layout title="Home">
     <div class="w-full h-full px-[20%] flex flex-row justify-center items-center">
-        <Search link={link} />
+        <Search />
         <Links />
-        <iframe id="iframe" class="hidden bg-[--background] w-full h-full absolute" src="/load"></iframe>
+        <iframe
+            id="iframe"
+            class="hidden bg-[--background] w-full h-full absolute"
+            src="/load"
+        ></iframe>
     </div>
 </Layout>

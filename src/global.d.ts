@@ -19,6 +19,7 @@ declare global {
         setTitle(): void;
         __uv: any;
         __get$ProxyUrl: any;
+        $scramjet: any;
     }
 }
 

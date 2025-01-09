@@ -1,5 +1,5 @@
 <div align="center">
-         
+
 <img src="https://socialify.git.ci/titaniumnetwork-dev/incognito/image?description=1&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Dark" alt="ruby" width="640" height="320" />
 
 <img alt="repo size" src="https://img.shields.io/github/repo-size/titaniumnetwork-dev/incognito?style=for-the-badge"></img>
@@ -26,9 +26,10 @@
 
 ## NOTE:
 
--   For Cyclic users this will unfortunatley *not* work due to Cyclic supporting very little languages
--   This will **NOT** deploy on Github Pages, Netlify, Vercel, Gitlab Pages or any other _static_ host
--   This will **NOT** work on Render
+- For Cyclic users this will unfortunatley _not_ work due to Cyclic supporting very little languages
+- This will **NOT** deploy on Github Pages, Netlify, Vercel, Gitlab Pages or any other _static_ host
+- This will **NOT** work on Render
+
 ---
 
 ## How to get links
@@ -41,9 +42,10 @@
 
 - Lots and lots of games
 
--   Multiple Proxy "Backends":
-    -   [Ultraviolet](https://github.com/titaniumnetwork-dev/ultraviolet)
-    -   [RammerHead](https://github.com/binary-person/rammerhead)
+- Multiple Proxy "Backends":
+  - [Ultraviolet](https://github.com/titaniumnetwork-dev/ultraviolet)
+  - [Scramjet (coming soon)](https://github.com/mercuryworkshop/scramjet)
+
 ---
 
 ## Contributors
@@ -51,24 +53,32 @@
 - [MotorTruck1221](https://motortruck1221.com) - Maintainer
 - [Rifting](https://github.com/rifting) - Maintainer
 - [caracal-js](https://github.com/caracal-js) - Original Creator
+
 ---
 
 ## Tech Stack
 
--   [Astro](https://astro.build)
--   [Fastify](https://fastify.dev)
--   [Bare Server Node](https://github.com/tomphttp/bare-server-node)
--   [Ultraviolet](https://github.com/titaniumnetwork-dev/ultraviolet)
--   [RammerHead](https://github.com/binary-person/rammerhead)
--   [Epoxy](https://github.com/mercuryworkshop/epoxy-tls)
--   HTML, CSS, and JavaScript (DUH)
+- [Astro](https://astro.build)
+- [Fastify](https://fastify.dev)
+- [Ultraviolet](https://github.com/titaniumnetwork-dev/ultraviolet)
+- [Epoxy](https://github.com/mercuryworkshop/epoxy-tls)
+- [Libcurl.js](https://github.com/ading2210/libcurl.js)
+- [Hono](https://github.com/honojs) as a Deno native alternative to fastify. Run with commadn: `deno task start:standalone`
+- [Deno 2.0](https://github.com/denoland/deno)
+- HTML, CSS, and JavaScript (DUH)
+
 ---
 
 ## Roadmap
 
+- [ ] - [Implement Scramjet](https://github.com/mercuryworkshop/scramjet)
+- [ ] - Remove dependency on Fastify & switch completely to Hono
+- [ ] - General codebase cleanup & remove all of the functions exisiting on `window`
+- [ ] - Games page needs to be reworked due to more games
 - [ ] - [i18n](https://github.com/alexandre-fernandez/astro-i18n)
 - [ ] - More themes
-- [ ] - Other transports
+- [ ] - Detatch from the [Original repo](https://github.com/caracal-js/incognito)
+
 ---
 
 ## Deployment
@@ -76,144 +86,177 @@
 ### Terminal
 
 Prerequisites:
+
 - Node & npm
+- Deno 2.0
 - Git
 
 1. Clone the repo:
+
 ```bash
 git clone https://github.com/titaniumnetwork-dev/incognito && cd incognito
 ```
 
 2. Install all of the dependencies:
+
 ```bash
-npm i
+deno install --allow-scripts # This is here for sharp and other dependencies like bufferutil
 ```
 
-3. Create a .env file
+3. Create a config.toml file
+
 ```bash
-cp .env.example .env
+cp config.example.toml config.toml
 ```
 
-4. Modify the .env file to you liking (docs [here](#environment))
+4. Modify the config.toml file to you liking (docs [here](#config))
+
 ```
-nano .env
+nano config.toml
 ```
 
 5. Build the frontend:
+
 ```bash
-npm run build
+deno task build
 ```
 
 6. Start the server
+
 ```bash
-npm start
+deno task start
 ```
 
 > [!NOTE]
-> You can run `npm run bstart` to build and start together
+> You can run `deno task start:standalone` to use Hono over Fastify, *recommended if you're using an external Wisp server like [Epoxy Server](https://github.com/mercuryworkshop/epoxy-tls)*
+>
+> You can run `deno task bstart` to build and start the server at the same time
+>
+> You can run `deno task bstart:standalone` to do the same as above but use the Hono server instead
+>
+> The Hono server has no built-in Wisp server so you'll have to provide one.
+
 ---
 
 ### Games
 
 - By default, games are reverse proxied by the server
-    - Game assets are located [here](https://github.com/ruby-network/ruby-assets)
-- To turn off Games, and access to them see [#environment](#environment)
-
+  - Game assets are located [here](https://github.com/ruby-network/ruby-assets)
+- To turn off Games, and access to them see [#config](#config)
 
 ### Docker
 
 - There are two ways to deploy with docker:
-    - [Normal docker](#normal-docker)
-    - [Docker Compose](#docker-compose)
+  - [Normal docker](#normal-docker)
+  - [Docker Compose](#docker-compose)
 
 #### Normal Docker
 
 Prerequisites:
+
 - Git
 - Docker
 
 1. Clone the repo (skip if using prebuilt image):
+
 ```bash
 git clone https://github.com/titaniumnetwork/incognito && cd incognito
 ```
 
-2. Create an .env file (if using prebuilt image, copy the example from the repo):
+2. Create an config.toml file (if using prebuilt image, copy the example from the repo):
+
 ```bash
-cp .env.example .env
+cp config.example.toml config.toml
 ```
 
-3. Modify the .env file to your liking (docs [here](#environment))
+3. Modify the .env file to your liking (docs [here](#config))
+
 ```bash
-nano .env
+nano config.toml
 ```
 
 4. Build the docker image (skip if using prebuilt):
+
 ```bash
-docker build --build-arg BARE_SERVER_OPTION=true GAMES_LINK=true RAMMERHEAD_OPTION=true -t incog:latest
+docker build -t incog:latest
 ```
-For info on the build arg check [here](#environment)
 
 5. Run the docker images:
 
-    - Prebuilt:
-    ```bash
-    docker run --env-file ./.env motortruck1221/incognito:latest
-    ```
-    - Image you built yourself:
-    ```bash
-    docker run --env-file ./.env incog:latest
-    ```
+   - Prebuilt:
+   ```bash
+   docker run --volume ./config.toml:/app/config.toml motortruck1221/incognito:latest
+   ```
+   - Image you built yourself:
+   ```bash
+   docker run --volume ./config.toml:/app/config.toml incog:latest
+   ```
 
 #### Docker Compose
 
 Prerequisites:
+
 - Git
 - Docker w/compose
 
 1. Clone the repo (skip if using prebuilt image):
+
 ```bash
 git clone https://github.com/titaniumnetwork-dev/incognito
 ```
 
-2. Create an .env file (if using prebuilt image, copy the example from the repo):
+2. Create an config.toml file (if using prebuilt image, copy the example from the repo):
+
 ```bash
-cp .env.example .env
+cp config.example.toml config.toml
 ```
 
-3. Modify the .env file to your liking (docs on that [here](#environment)]
+3. Modify the config.toml file to your liking (docs on that [here](#config)]
+
 ```bash
-nano .env
+nano config.toml
 ```
 
 4. Build the docker image (skip if using prebuilt):
+
 ```bash
 docker compose -f ./docker-compose.build.yml build
 ```
 
 5. Run the docker image:
 
-    - Prebuilt:
-    ```bash
-    docker compose up
-    ```
-    - Image you built yourself:
-    ```bash
-    docker compose -f ./docker-compose.build.yml up
-    ```
+   - Prebuilt:
+   ```bash
+   docker compose up
+   ```
+   - Image you built yourself:
+   ```bash
+   docker compose -f ./docker-compose.build.yml up
+   ```
+
 ---
 
-## Environment
+## Config
 
-- There are a couple of environment variables for incognito. Most of the time, the defaults are fine, but there are instances where you may not want certain options enabled or certain things running.
+- The config is rather simple and quick, it's done in TOML and there are only two object:
+- `buildOpts` & `server` below there will be 2 tables showcasing the possible values.
+> [!NOTE]
+> As it says, `buildOpts` will only apply when *building* the website. This can be changed in the docker-compose files.
 
-| Variable               | Description                                                                                              | Default |
-|------------------------|----------------------------------------------------------------------------------------------------------|---------|
-| `MASQR`                | Enables (`true`)/Disables (`false`) Masqr (most people don't want this)                                   | `false` |
-| `BARE_SERVER_ENABLED`  | Enables (`true`)/Disables (`false`) the integrated bare server. Use this if you already have a server (e.g., reverse proxy) or don't want users accessing it. | `true`  |
-| `PORT`                 | The port that the server listens on ***IGNORED IN THE DOCKER ENVIRONMENTS***                              | `8080` |
-| `GAMES` | Disable (`false`)/Enable (`true`) the reverse proxy for Games | `true` |
-| `RAMMERHEAD_SERVER_ENABLED` | Disable (`false`)/Enabled (`true`) the integrated Rammerhead server | `true` |
-| `SITE` | Your websites domain (eg: https://example.com) | `http://localhost:8080` |
-| `BARE_SERVER_OPTION`   | Enables (`true`)/Disables (`false`) the option to use a bare server in the frontend. ***THIS IS A BUILD TIME ONLY VARIABLE*** | `true`  |
-| `GAMES_LINK` | Enables (`true`)/Disables (`false`) access to the games page ***BUILD TIME ONLY*** | `true` |
-| `RAMMERHEAD_OPTION` | Enabled (`true`)/Disables (`false`) the option to use Rammerhead in the frontend. ***BUILD TIME ONLY*** | `true` |
+##### Build Opts
+| Type | Default | Description                        | Can be overwritten by ENV var |
+|------|---------|------------------------------------|-------------------------------|
+| games | `true` | Disables or enables the games page | - [ ] - No |
+
+##### Server
+| Type | Default | Description                                                                                                     | Can be overwritten by ENV var |
+|------|---------|-----------------------------------------------------------------------------------------------------------------|------------------------------|
+| port | `8000`  | Change the default port. *Note: the environment var `PORT` takes precedence*                                    | - [x] - Yes |
+| wisp | `true`  | Disable or enables the in built wisp server. *Note: when using the Hono server there is no built-in wisp server | - [ ] - No |
+
+##### SEO
+| Type   | Default                 | Description                                                              | Can be overwritten by ENV var | Is used at build time |
+---------|-------------------------|--------------------------------------------------------------------------|-------------------------------|-----------------------|
+| SEO    | `false`                 | Change whether or not to enabled SEO                                     | - [x] - Yes - `SEO`           | - [x] - Yes           |
+| DOMAIN | `http://localhost:8000` | When the `both` option is enable, only show the SEO stuff on this domain | - [x] - Yes - `DOMAIN`        | - [ ] - No            |
+| BOTH   | `false`                 | Works in tandem with option `DOMAIN`                                     | - [x] - Yes - `BOTH`          | - [ ] - No            |

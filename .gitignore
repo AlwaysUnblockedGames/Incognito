@@ -1,5 +1,6 @@
 # build output
 dist/
+!vendor/scramjet/dist/
 
 # generated types
 .astro/
@@ -17,9 +18,15 @@ pnpm-debug.log*
 .env
 .env.production
 
+#Config stuff
+config.toml
+
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+
+# Stupidness
 ~/
+

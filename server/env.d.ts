@@ -1,3 +1,2 @@
-declare module '@rubynetwork/corlink-fastify';
-declare module '@rubynetwork/rammerhead/src/server/index.js';
-declare module '@dotenvx/dotenvx';
+/// <reference types="npm:@types/node" />
+/// <reference types="npm:smol-toml" />

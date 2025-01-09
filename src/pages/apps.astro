@@ -60,9 +60,7 @@ const images = import.meta.glob<{ default: ImageMetadata }>(
     <script>
         import { navigate } from "astro:transitions/client"; 
         window.openApp = function(url: string) {
-            window.loadProxyScripts().then(() => {
-                navigate("/?link=" + __uv$config.encodeUrl!(url));
-            });
+            navigate(`/?link=${localStorage.getItem("incog||proxy") === "uv" ? __uv$config.encodeUrl!(url) : $scramjet.codec.encode(url)}`);
         }
         window.searchApps = function(val: string) {
             let elements: NodeListOf<HTMLElement> = document.querySelectorAll('[data-name]');

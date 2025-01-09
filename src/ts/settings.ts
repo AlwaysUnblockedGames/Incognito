@@ -31,4 +31,4 @@ function changeFavicon(url: string | null) {
     }
 }
 
-export { setTheme, setProxy, setTransport, changeTitle, changeFavicon };
+export { changeFavicon, changeTitle, setProxy, setTheme, setTransport };

@@ -1,16 +1,20 @@
-FROM node:21-alpine
+FROM denoland/deno:debian-2.1.4
 
 WORKDIR /app
 
 COPY package*.json .
+COPY deno.jsonc .
 COPY . .
 
-RUN apk update
-RUN apk add python3 py3-pip alpine-sdk openssl-dev build-base python3-dev
-RUN python3 -m pip install setuptools --break-system-packages
-RUN npm i -g pnpm
-RUN pnpm install
-RUN pnpm run build
-EXPOSE 8080
-ENTRYPOINT ["pnpm"]
-CMD ["start"]
+ARG SEO
+RUN apt update
+RUN apt install -y python3 python3-pip libssl-dev build-essential python3-dev nodejs
+RUN cp -n config.example.toml config.toml
+RUN deno install --allow-scripts
+RUN deno task build
+RUN export TERM=xterm-256color
+ENV PORT="8000"
+VOLUME /app
+EXPOSE 8000
+ENTRYPOINT ["deno", "task"]
+CMD ["start", "--color"]

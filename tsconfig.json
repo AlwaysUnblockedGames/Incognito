@@ -1,6 +1,6 @@
 {
     "extends": "astro/tsconfigs/strict",
-    "exclude": ["dist/**", "node_modules/**", "public/**", "src/ts/rammerhead.ts"],
+    "exclude": ["server/**/*", "dist/**/*", "node_modules/**/*", "public/**/*", "vendor/**"],
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {

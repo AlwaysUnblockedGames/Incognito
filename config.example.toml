@@ -1,0 +1,11 @@
+[buildOpts]
+games = true
+
+[server]
+wisp = true
+port = 8000
+
+[seo]
+enabled = false
+both = false
+domain = "http://localhost:8000"

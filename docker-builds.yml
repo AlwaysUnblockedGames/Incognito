@@ -1,0 +1,19 @@
+version: '3'
+
+# This file is for building the docker images and pushing them to the registry. You can safely ignore this
+
+services:
+    incognito:
+        image: motortruck1221/incognito:latest
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: incognito
+        restart: unless-stopped
+    incognito-versioned:
+        image: motortruck1221/incognito:1.1.5
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: incognito
+        restart: unless-stopped 

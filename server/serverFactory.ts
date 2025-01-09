@@ -1,47 +1,23 @@
 import { createServer } from 'node:http';
-import { createBareServer } from '@nebula-services/bare-server-node';
-import wisp from 'wisp-server-node';
-import { createRammerhead, shouldRouteRh, routeRhRequest, routeRhUpgrade } from '@rubynetwork/rammerhead';
-function initRHServer() {
-    if (process.env.RAMMERHEAD_SERVER_ENABLED === 'true') {
-        const rh = createRammerhead({
-            logLevel: 'disabled',
-            reverseProxy: true,
-            disableLocalStorageSync: false,
-            disableHttp2: false
-        })
-        return rh
-    }
-}
+import { Socket } from 'node:net';
+import {
+    type FastifyServerFactory,
+    FastifyServerFactoryHandler,
+    RawServerDefault,
+} from 'npm:fastify';
+import wisp from 'npm:wisp-server-node';
+import { parsedDoc } from './config/config.ts';
 
-function initBareServer() {
-    if (process.env.BARE_SERVER_ENABLED === 'true') {
-        const bare = createBareServer('/bare/');
-        return bare;
-    }
-}
-
-const bare = initBareServer();
-const rh = initRHServer();
-
-const serverFactory = (handler: any) => {
+const serverFactory: FastifyServerFactory = (
+    handler: FastifyServerFactoryHandler,
+): RawServerDefault => {
     return createServer()
-        .on('request', (req: any, res: any) => {
-            if (bare?.shouldRoute(req)) {
-                bare?.routeRequest(req, res);
-            } else if (shouldRouteRh(req)) {
-                routeRhRequest(rh, req, res);
-            } else {
-                handler(req, res);
-            }
+        .on('request', (req, res) => {
+            handler(req, res);
         })
-        .on('upgrade', (req: any, socket: any, head: any) => {
-            if (bare?.shouldRoute(req)) {
-                bare?.routeUpgrade(req, socket, head);
-            } else if (shouldRouteRh(req)) {
-                routeRhUpgrade(rh, req, socket, head);
-            } else if (req.url?.endsWith('/wisp/')) {
-                wisp.routeRequest(req, socket, head);
+        .on('upgrade', (req, socket, head) => {
+            if (req.url?.endsWith('/wisp/') && parsedDoc.server.wisp === true) {
+                wisp.routeRequest(req, socket as Socket, head);
             }
         });
 };

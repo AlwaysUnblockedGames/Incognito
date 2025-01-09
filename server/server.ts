@@ -1,53 +1,47 @@
-import { fileURLToPath } from 'node:url';
 import fastifyCompress from '@fastify/compress';
 import fastifyCookie from '@fastify/cookie';
 import fastifyHttpProxy from '@fastify/http-proxy';
 import fastifyMiddie from '@fastify/middie';
 import fastifyStatic from '@fastify/static';
-import { masqr } from '@rubynetwork/corlink-fastify';
-import chalk from 'chalk';
 import Fastify from 'fastify';
-import isDocker from 'is-docker';
-//@ts-ignore THE FILE IS GENERATED AT FUCKING BUILD WHY WOULD I WANT IT TYPE CHECKED
-import { handler as ssrHandler } from '../dist/server/entry.mjs';
-import { serverFactory } from './serverFactory';
+import { serverFactory } from './serverFactory.ts';
+import { listeningMessage } from "./message.ts";
+import { parsedDoc } from "./config/config.ts";
 
 const app = Fastify({ logger: false, serverFactory: serverFactory });
 
 await app.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECRET || 'e',
+    secret: Deno.env.get('COOKIE_SECRET') || 'yes',
     parseOptions: {}
 });
-if (process.env.MASQR === 'true') {
-    await app.register(masqr, {
-        deniedFilePath: fileURLToPath(new URL('./denied.html', import.meta.url)),
-        unlockedPaths: ['/bare/', '/wisp/'],
-        whiteListedURLs: [],
-        masqrUrl: 'https://corlink.example.com/validate?license=',
-        builtinCookieParser: false,
-        v3: false
-    });
-}
 await app.register(fastifyCompress, {
     encodings: ['br', 'gzip', 'deflate']
 });
-await app.register(fastifyStatic, {
-    root: fileURLToPath(new URL('../dist/client', import.meta.url))
-});
+
+if (parsedDoc.seo.enabled && !parsedDoc.seo.both || !parsedDoc.seo.enabled) {
+    await app.register(fastifyStatic, {
+        root: `${Deno.cwd()}/dist`
+    });
+} else {
+    await app.register(fastifyStatic, {
+        root: `${Deno.cwd()}/dist/noseo`,
+    });
+    await app.register(fastifyStatic, {
+        root: `${Deno.cwd()}/dist/seo`,
+        constraints: { host: new URL(Deno.env.get('DOMAIN') || parsedDoc.seo.domain).host },
+        decorateReply: false
+    })
+}
+
 await app.register(fastifyMiddie);
 await app.register(fastifyHttpProxy, {
     upstream: 'https://rawcdn.githack.com/ruby-network/ruby-assets/main/',
     prefix: '/gms/',
     http2: false
 });
-app.use(ssrHandler);
-let port: number;
-if (isDocker()) {
-    port = 8080;
-} else {
-    port = parseInt(process.env.PORT as string);
-}
-console.log(chalk.green(`Server listening on ${chalk.bold('http://localhost:' + port)}`));
-console.log(chalk.magenta(`Server also listening on ${chalk.bold('http://0.0.0.0:' + port)}`));
 
-app.listen({ port: port, host: '0.0.0.0' });
+const port = parseInt(Deno.env.get('PORT') as string) || parsedDoc.server.port || 8000;
+
+app.listen({ port: port, host: '0.0.0.0' }).then(() => {
+    listeningMessage(port, "fastify");
+});

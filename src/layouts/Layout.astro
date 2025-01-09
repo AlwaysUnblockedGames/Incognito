@@ -1,7 +1,16 @@
 ---
 import { SEO } from 'astro-seo';
-const { title } = Astro.props;
-import { ViewTransitions } from 'astro:transitions';
+import { SEO as SEOConf } from "astro:env/client";
+
+interface Props {
+    title?: string;
+    redirect?: {
+        path: string;
+        interval: number;
+    }
+}
+const { title, redirect } = Astro.props;
+import { ClientRouter } from 'astro:transitions';
 import LoadScripts from '@components/Scripts.astro';
 import SettingsLoader from '@components/settings/Loader.astro';
 ---
@@ -12,33 +21,33 @@ import SettingsLoader from '@components/settings/Loader.astro';
         <LoadScripts transition:persist />
         <SEO
             title={title}
-            titleTemplate="Incognito | %s"
-            titleDefault="Incognito"
-            description="Search the world wide web"
+            titleTemplate=`${SEOConf ? "Incognito | %s" : "%s"}`
+            titleDefault=`${SEOConf ? 'Incognito': ''}`
+            description=`${SEOConf ? 'Search the world wide web': ''}`
             charset="UTF-8"
             openGraph = {{
                 basic: {
-                    title: "Incognito",
+                    title: SEOConf ? "Incognito": '',
                     type: "website",
-                    url: "https://incog.works",
-                    image: "/logo.svg"
+                    url: SEOConf ? "https://incog.works": '',
+                    image: SEOConf ? "/logo.svg": ''
                 },
                 optional: {
-                    description: "Search the world wide web"
+                    description: SEOConf ? "Search the world wide web": ''
                 }
             }}
             twitter = {{
                 card: "summary_large_image",
-                url: "https://incog.works",
-                title: "Incognito",
-                description: "Search the world wide web",
-                image: "/logo.svg",
-                imageAlt: "Incognito's logo"
+                url: SEOConf ? "https://incog.works": '',
+                title: SEOConf ? "Incognito": '',
+                description: SEOConf ? "Search the world wide web": '',
+                image: SEOConf ? "/logo.svg": '',
+                imageAlt: SEOConf ? "Incognito's logo": ''
             }}
             extend = {{
                 link: [
                     { rel: "icon", type: "image/svg+xml", href: "/logo.svg", id: "favicon" },
-                    { rel: "sitemap", href: "/sitemap-index.xml" },
+                    SEOConf && { rel: "sitemap", href: "/sitemap-index.xml" },
                     { rel: "preconnect", href: "https://fonts.googleapis.com" },
                     { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: true },
                     { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" },
@@ -47,11 +56,12 @@ import SettingsLoader from '@components/settings/Loader.astro';
                 ],
                 meta: [
                     { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-                    { name: "title", content: "Incognito" },
+                    { name: "title", content: SEOConf ? "Incognito": '' },
                 ]
             }}
         />
-        <ViewTransitions fallback="animate" />
+        {redirect !== undefined && <meta http-equiv="refresh" content=`${redirect.interval};${redirect.path}`>}
+        <ClientRouter fallback="animate" />
     </head>
     <body class="w-full h-screen min-h-screen text-[--text-color]">
         <style is:global>

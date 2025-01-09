@@ -1,3 +1,4 @@
+/// <reference path="../.astro/types.d.ts" />
 /// <reference path="../.astro/env.d.ts" />
 /// <reference types="astro/client" />
 /// <reference types="@titaniumnetwork-dev/ultraviolet/client" />
@@ -7,3 +8,5 @@ type Suggestion = {
 };
 declare var BareMux: any;
 declare var EpxMod: any;
+declare var ScramjetController: any;
+declare var $scramjet: any;

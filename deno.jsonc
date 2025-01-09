@@ -1,0 +1,67 @@
+{
+    "$schema": "https://deno.land/x/deno@v2.1.4/cli/schemas/config-file.v1.json",
+    "nodeModulesDir": "auto",
+    "tasks": {
+        "dev:server": "deno run -A --watch server/server.ts",
+        "dev:client": "astro dev",
+        "dev": "deno task dev:server & deno task dev:client",
+        "build:seo": "deno task check:frontend && SEO=true astro build --outDir dist/seo/ && SEO=false astro build --outDir dist/noseo/",
+        "build": "deno task check:frontend && astro build",
+        "start": "deno run --allow-net --allow-read --allow-env --allow-ffi --allow-sys server/server.ts",
+        "bstart": "deno task build && deno task start",
+        "bstart:seo": "deno task build:seo && deno task start",
+        "bstart:standalone": "deno task build && deno task start:standalone",
+        "bstart:standalone:seo": "deno task build:seo && deno task start:standalone",
+        "start:standalone": "deno run --allow-net --allow-read --allow-env server/standalone/standalone.ts",
+        "check:frontend": "astro check",
+        "check:server": "deno check server/**/*.ts",
+        "check": "deno task check:frontend && deno task check:server",
+        "changeset:version": "changeset version",
+        "changeset:publish": "changeset publish"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "lineWidth": 100,
+        "semiColons": true,
+        "proseWrap": "preserve",
+        "singleQuote": true
+    },
+    "imports": {
+        // Astro deps
+        "@astrojs/check": "npm:@astrojs/check@^0.9.4",
+        "@astrojs/sitemap": "npm:@astrojs/sitemap@^3.2.1",
+        "@astrojs/tailwind": "npm:@astrojs/tailwind@^5.1.3",
+        "astro": "npm:astro@^5.0.5",
+        "astro-seo": "npm:astro-seo@^0.8.4",
+        "astro-icon": "npm:astro-icon@^1.1.4",
+        "astro-robots-txt": "npm:astro-robots-txt@^1.0.0",
+        "tailwindcss": "npm:tailwindcss@^3.4.16",
+        "vite-plugin-static-copy": "npm:vite-plugin-static-copy@^2.2.0",
+        "@iconify-json/fa-solid": "npm:@iconify-json/fa-solid@^1.2.0",
+        "@iconify-json/fa6-solid": "npm:@iconify-json/fa6-solid@^1.2.2",
+        "@iconify-json/mdi": "npm:@iconify-json/mdi@1.2.1",
+        "@playform/compress": "npm:@playform/compress@^0.1.6",
+        "sharp": "npm:sharp@^0.33.5",
+        //Server stuff
+        "@fastify/compress": "npm:@fastify/compress@^8.0.1",
+        "@fastify/cookie": "npm:@fastify/cookie@^11.0.1",
+        "@fastify/http-proxy": "npm:@fastify/http-proxy@^10.0.1",
+        "@fastify/middie": "npm:@fastify/middie@^9.0.2",
+        "@fastify/static": "npm:@fastify/static@^8.0.2",
+        "fastify": "npm:fastify@^5.1.0",
+        //UV, bare-mux, RH, corlink & wisp
+        "@mercuryworkshop/bare-mux": "npm:@mercuryworkshop/bare-mux@^2.1.7",
+        "@mercuryworkshop/epoxy-transport": "npm:@mercuryworkshop/epoxy-transport@^2.1.27",
+        "@mercuryworkshop/libcurl-transport": "npm:@mercuryworkshop/libcurl-transport@^1.3.14",
+        "@titaniumnetwork-dev/ultraviolet": "npm:@titaniumnetwork-dev/ultraviolet@^3.2.10",
+        "wisp-server-node": "npm:wisp-server-node@^1.1.7",
+        //random other deps
+        "chalk": "npm:chalk@^5.3.0",
+        "@changesets/cli": "npm:@changesets/cli@^2.27.10",
+        "smol-toml": "npm:smol-toml@^1.3.1",
+        "@types/node": "npm:@types/node@^22.9.0",
+        "gradient-string": "npm:gradient-string@^3.0.0",
+        "@types/deno": "npm:@types/deno@^2.0.0",
+        "typescript": "npm:typescript@^5.7.2" //I need this for astro typechecking for some damn reason
+    }
+}

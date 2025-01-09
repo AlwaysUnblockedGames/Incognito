@@ -1,8 +1,7 @@
 ---
+import type { GetStaticPaths } from 'astro';
+import games from '../../data/games.json';
 const { game } = Astro.params;
-const proxy = Astro.url.searchParams.get('py') || null;
-const url = Astro.url.searchParams.get('url') || null;
-const baseFile = Astro.url.searchParams.get('bf') || null;
 import { GAMES_LINK } from 'astro:env/client';
 import Layout from '@layouts/Layout.astro';
 import { Icon } from 'astro-icon/components';
@@ -14,72 +13,99 @@ function decode(val: string) {
 if (!GAMES_LINK) {
     return Astro.redirect('/');
 }
+interface Game {
+    params: { game: string };
+}
+export const getStaticPaths = (async () => {
+    const gamesList: Game[] = games.map((game) => ({
+        params: { game: btoa(game.name) },
+    }));
+    return gamesList;
+}) satisfies GetStaticPaths;
 ---
 <Layout title="">
     <div class="flex flex-col w-full h-full bg-[--background]">
         <div class="h-[80px] w-full px-[15%] flex self-center transition duration-200">
             <div class="flex grow items-center justify-left">
-                <a aria-label="games homepage" href="/gs" class="text-[30px] text-[--accent] mr-[20px]">
+                <a
+                    aria-label="games homepage"
+                    href="/gs"
+                    class="text-[30px] text-[--accent] mr-[20px]"
+                >
                     <Icon name="mdi:chevron-left" />
                 </a>
                 <p class="text-[16px] grow font-medium text-[--accent]">
-                    { decode(game as string) }
+                    {decode(game as string)}
                 </p>
-                <button aria-label="fullscreen game" onclick="fullScreenGame()" class="self-right text-[30px] text-[--accent]">
+                <button
+                    aria-label="fullscreen game"
+                    onclick="fullScreenGame()"
+                    class="self-right text-[30px] text-[--accent]"
+                >
                     <Icon name="mdi:fullscreen" />
                 </button>
             </div>
         </div>
-        <proxy-url data-url={decode(url as string)} data-proxy={proxy} class="hidden" />
-        {proxy !== "true" ?
-            <iframe id="gameIframe" class="w-full h-full" src={`/gms/${decode(game as string)!.toLowerCase().replace(/\s/g, '-')}/${decode(baseFile as string)}`} />
-            :
-            <iframe id="gameIframe" class="w-full h-full" src="/load" />
-        }
+        <iframe id="gameIframe-normal" class="hidden w-full h-full" src="/load" />
+        <iframe id="gameIframe-py" class="hidden w-full h-full" src="/load" />
+        <proxy-url data-gm={game} class="hidden" />
     </div>
     <script>
-        import { initServiceWorker } from "@scripts/serviceWorker.ts";
-        import { RammerheadEncode } from "@rubynetwork/rammerhead-browser";
-        import { RAMMERHEAD_PREFIX } from "astro:env/client";
-        window.fullScreenGame = function() {
-            const iframe = document.getElementById("gameIframe") as HTMLIFrameElement;
-            iframe.requestFullscreen();
+        import { initServiceWorker } from '@scripts/serviceWorker.ts';
+        document.addEventListener('DOMContentLoaded', () => {
+            initServiceWorker().then(() => {
+                console.log('Service worker active!');
+            });
+        });
+    window.fullScreenGame = function () {
+        const iframe = document.getElementById('gameIframe') as HTMLIFrameElement;
+        iframe.requestFullscreen();
+    };
+        async function prox(term: string, iframeId: string) {
+        console.log(term);
+        let url;
+        if (localStorage.getItem('incog||proxy') === 'uv') {
+            url = __uv$config!.prefix + __uv$config.encodeUrl!(term);
+        } 
+        else if (localStorage.getItem('incog||proxy') === 'sj') {
+            url = $scramjet.config.prefix + $scramjet.codec.encode(term);
         }
-        async function prox(term: string) {
-            let url;
-            if (localStorage.getItem("incog||proxy") === "uv") {
-                console.log(url)
-                url = __uv$config!.prefix + __uv$config.encodeUrl!(term)
-            } else if (localStorage.getItem("incog||proxy") === "rh") {
-               if (RAMMERHEAD_PREFIX !== '') {
-                    url = await RammerheadEncode(term, RAMMERHEAD_PREFIX)
-                }
-                else {
-                    url = await RammerheadEncode(term)
+        const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+        iframe.src = url as string || '/load';
+        if (!iframe) {
+            return;
+        }
+    }
+    let game: string | undefined;
+    class ProxyUrl extends HTMLElement {
+        constructor() {
+            super();
+            game = this.dataset.gm;
+        }
+    }
+    customElements.define('proxy-url', ProxyUrl);
+    try {
+        document.addEventListener('astro:page-load', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const py = params.get('py');
+            const url = params.get('url');
+            const baseFile = params.get('bf');
+            const pyIframe = document.getElementById('gameiframe-py') as HTMLIFrameElement;
+            const normalIframe = document.getElementById(
+                'gameIframe-normal',
+            ) as HTMLIFrameElement;
+            if (py && url) {
+                pyIframe.classList.remove('hidden');
+                await prox(url, 'gameIframe-py');
+            } else {
+                if (normalIframe) {
+                    normalIframe.classList.remove('hidden');
+                    normalIframe.src = '/load';
+                    await prox(`https://rawcdn.githack.com/ruby-network/ruby-assets/main/games/${atob(game as string)!.toLowerCase().replace(/\s/g, '-')}/${atob(baseFile as string)}`, 'gameIframe-normal');
                 }
             }
-            const iframe = document.getElementById("gameIframe") as HTMLIFrameElement
-            iframe.src = url as string || "/load";
-            if (!iframe) {
-                return; 
-            }
-        }
-        class ProxyUrl extends HTMLElement {
-            constructor() {
-                super();
-                const url = this.dataset.url;
-                const proxy = this.dataset.proxy;
-                if (url && proxy === "true") { 
-                    initServiceWorker().then(() => {
-                        console.log("ea" + url)
-                        prox(url);
-                    })
-                }
-            }
-        }
-        customElements.define("proxy-url", ProxyUrl);
-    </script>
-    <script is:inline>
-        history.pushState({}, "", "/gs");
+            history.pushState({}, '', '/gs');
+        });
+    } catch (_) {}
     </script>
 </Layout>
